@@ -1,12 +1,12 @@
--- | A definition of a production
+-- | Production definition
 
 module Production
-  ( -- * Production
-    Production (..)
+  ( Production (..)
 
     -- * Right hand side
-  , productionRhsTerminals
-  , productionRhsNonterminals
+
+  , rhsTerminals
+  , rhsNonterminals
 
   ) where
 
@@ -18,23 +18,23 @@ import qualified Data.Set as Set
 -- | A production of a grammar
 data Production t n = Production
 
-  { productionLhs :: n
+  { lhs :: n
     -- ^ A nonterminal on the left hand side
 
-  , productionRhs :: [Either t n]
+  , rhs :: [Either t n]
     -- ^ A sequence of symbols on the right hand side
 
   } deriving (Eq, Ord, Show)
 
 -- | A set of symbols on the right hand side of a production
-productionRhsSymbols :: (Ord t, Ord n) => Production t n -> (Set t, Set n)
-productionRhsSymbols (Production _ r) = (Set.fromList ts, Set.fromList ns) where
+rhsSymbols :: (Ord t, Ord n) => Production t n -> (Set t, Set n)
+rhsSymbols (Production _ r) = (Set.fromList ts, Set.fromList ns) where
   (ts, ns) = partitionEithers r
 
 -- | A set of terminals on the right hand side of a production
-productionRhsTerminals :: (Ord t, Ord n) => Production t n -> Set t
-productionRhsTerminals = fst . productionRhsSymbols
+rhsTerminals :: (Ord t, Ord n) => Production t n -> Set t
+rhsTerminals = fst . rhsSymbols
 
 -- | A set of nonterminals on the right hand side of a production
-productionRhsNonterminals :: (Ord t, Ord n) => Production t n -> Set n
-productionRhsNonterminals = snd . productionRhsSymbols
+rhsNonterminals :: (Ord t, Ord n) => Production t n -> Set n
+rhsNonterminals = snd . rhsSymbols

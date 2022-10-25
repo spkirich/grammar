@@ -1,8 +1,7 @@
--- | A definition of a grammar
+-- | Grammar definition
 
 module Grammar
-  ( -- * Grammar
-    Grammar (..)
+  ( Grammar (..)
 
   ) where
 
@@ -14,16 +13,16 @@ import Production
 -- | A grammar
 data Grammar t n = Grammar
 
-  { grammarTerminals :: Set t
+  { terminals :: Set t
     -- ^ A set of terminals
 
-  , grammarNonterminals :: Set n
+  , nonterminals :: Set n
     -- ^ A set of nonterminals
 
-  , grammarProductions :: Set (Production t n)
+  , productions :: Set (Production t n)
     -- ^ A set of productions
 
-  , grammarStartNonterminal :: n
+  , startNonterminal :: n
     -- ^ The start nonterminal
 
   } deriving (Show)
