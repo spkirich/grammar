@@ -7,5 +7,8 @@ A context-free grammar processing library for Haskell enjoyers
 The library is under development yet.
 There is some work to be done:
 
-- [ ] Implement grammar normalization.
-- [ ] Implement regular approximation of a grammar.
+- [ ] parsing;
+- [ ] pretty-printing;
+- [ ] normalization;
+- [ ] simple regularity check;
+- [ ] regular approximation.
