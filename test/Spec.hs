@@ -6,11 +6,12 @@ import System.Exit
 
 import Test.QuickCheck
 
+import Grammar
 import Production
 
 instance (Arbitrary t, Arbitrary n) => Arbitrary (Production t n) where
 
-  -- | Arbitrary production
+  -- | An arbitrary production
   arbitrary = Production <$> arbitrary <*> arbitrary
 
 -- | Test production right hand side partitionability
