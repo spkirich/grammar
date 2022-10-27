@@ -18,3 +18,13 @@ There is some work to be done:
     - [ ] reducing to Kuroda normal form;
 - [ ] simple regularity check;
 - [ ] regular approximation.
+
+## Acknowledges
+
+This library is inspired by lectures of Alexey Belousov and
+[Antonina Nepeivoda](https://github.com/TonitaN). Moreover, it is
+based upon an amazing
+[work](https://github.com/StarikTenger/RegularLanguageProblem) by
+[Andrei Ilin](https://github.com/StarikTenger),
+[Edgar Makarov](https://github.com/Robby-the-paladin) and
+[Sofia Belyakova](https://github.com/SoFa325).
