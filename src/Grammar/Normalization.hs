@@ -15,6 +15,9 @@ module Grammar.Normalization
 
     -- * Long productions
 
+  , longProductions
+  , eliminateLongProductions
+
     -- * Epsilon-productions
 
     -- * Unit productions
@@ -63,3 +66,17 @@ nonGeneratingNonterminals g = Set.difference (nonterminals g) $ generatingNonter
 eliminateUselessNonterminals :: (Ord t, Ord n) => Grammar t n -> Grammar t n
 eliminateUselessNonterminals g = eliminateNonterminals (nonGeneratingNonterminals h) h where
   h = eliminateNonterminals (unreachableNonterminals g) g
+
+-- | A set of all long grammar productions.
+longProductions :: Grammar t n -> Set (Production t n)
+longProductions = Set.filter ((> 2) . length . rhs) . productions
+
+-- | Eleminate all long productions from the grammar.
+eliminateLongProductions :: (Ord t, Enum n, Ord n) => Grammar t n -> Grammar t n
+eliminateLongProductions g = foldr eliminate g $ longProductions g where
+  eliminate p h = let ns = take (length (rhs p) - 2) $ freeNonterminals h in h
+    { nonterminals = Set.union (nonterminals h) $ Set.fromList ns
+    , productions  = Set.delete p . Set.union (productions h) . Set.fromList $
+        zipWith3 (\l q r -> Production l [q, r])
+          (lhs p : ns) (init $ rhs p) $ map Right ns ++ [last $ rhs p]
+    }

@@ -5,6 +5,8 @@ module Grammar.Definition
 
     Grammar (..)
 
+  , freeNonterminals
+
     -- * Production
 
   , Production (..)
@@ -35,6 +37,10 @@ data Grammar t n = Grammar
     -- ^ the start nonterminal.
 
   } deriving (Show)
+
+-- | An infinite list of free nonterminals for the grammar.
+freeNonterminals :: (Enum n, Ord n) => Grammar t n -> [n]
+freeNonterminals g = let m = maximum $ nonterminals g in [m .. ]
 
 -- | A production is exactly:
 data Production t n = Production

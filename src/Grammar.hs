@@ -9,6 +9,7 @@ module Grammar
     -- * Normalization
 
   , eliminateUselessNonterminals
+  , eliminateLongProductions
 
     -- * Regularity check
 

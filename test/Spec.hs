@@ -127,5 +127,22 @@ spec = do
       in Set.union gns nns == nonterminals
         (g :: Grammar Int Int)
 
+  describe "longProductions" $ do
+
+    prop "contains no short productions" $ \g -> let
+        lps = longProductions (g :: Grammar Int Int)
+      in all ((> 2) . length . rhs) lps
+
+    prop "contains all long productions" $ \g -> let
+        lps = longProductions (g :: Grammar Int Int)
+      in not . any ((> 2) . length . rhs) $
+        Set.difference (productions g) lps
+
+  describe "eliminateLongProductions" $ do
+
+    prop "keeps no long productions" $ \g -> let
+        h = eliminateLongProductions g :: Grammar Int Int
+      in null $ longProductions h
+
 main :: IO ()
 main = hspec spec

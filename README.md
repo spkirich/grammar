@@ -9,7 +9,7 @@ There is some work to be done:
 
 - [ ] normalization;
     - [x] elimination of useless nonterminals;
-    - [ ] elimination of long productions;
+    - [x] elimination of long productions;
     - [ ] elimination of epsilon-productions;
     - [ ] elimination of unit productions;
     - [ ] reducing to Chomsky normal form;
