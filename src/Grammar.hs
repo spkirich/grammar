@@ -8,6 +8,8 @@ module Grammar
 
     -- * Normalization
 
+  , eliminateUselessNonterminals
+
     -- * Regularity check
 
     -- * Regular approximation

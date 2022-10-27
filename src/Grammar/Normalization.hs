@@ -3,8 +3,15 @@
 module Grammar.Normalization
   ( -- * Useless nonterminals
 
-    generatingNonterminals
-  , eliminateNonGeneratingNonterminals
+    eliminateNonterminals
+
+  ,   reachableNonterminals
+  , unreachableNonterminals
+
+  ,    generatingNonterminals
+  , nonGeneratingNonterminals
+
+  , eliminateUselessNonterminals
 
     -- * Long productions
 
@@ -27,14 +34,32 @@ import qualified Data.Set as Set
 
 import Grammar.Definition
 
--- | A set of all generating nonterminals of the grammar.
+-- | Eliminate a given set of the grammar nonterminals.
+eliminateNonterminals :: (Ord t, Ord n) => Set n -> Grammar t n -> Grammar t n
+eliminateNonterminals ns g = g { nonterminals = Set.difference (nonterminals g) ns, productions = ps } where
+  ps = Set.filter (\p -> not $ Set.member (lhs p) ns && all (`Set.member` ns) (rhsNonterminals p)) $ productions g
+
+-- | A set of all reachable grammar nonterminals.
+reachableNonterminals :: (Ord t, Ord n) => Grammar t n -> Set n
+reachableNonterminals g = fst $ until (uncurry (==)) (\(_, ns) -> (ns, step ns)) (Set.empty, basis) where
+  step ns = Set.union ns . Set.unions . Set.map rhsNonterminals . Set.filter ((`Set.member` ns) . lhs) $ productions g
+  basis = Set.singleton $ startNonterminal g
+
+-- | A set of all unreachable grammar nonterminals.
+unreachableNonterminals :: (Ord t, Ord n) => Grammar t n -> Set n
+unreachableNonterminals g = Set.difference (nonterminals g) $ reachableNonterminals g
+
+-- | A set of all generating grammar nonterminals.
 generatingNonterminals :: (Ord t, Ord n) => Grammar t n -> Set n
 generatingNonterminals g = fst $ until (uncurry (==)) (\(_, ns) -> (ns, step ns)) (Set.empty, basis) where
   step ns = Set.union ns . Set.map lhs . Set.filter (all (`Set.member` ns) . rhsNonterminals) $ productions g
   basis = Set.map lhs . Set.filter (null . rhsNonterminals) $ productions g
 
--- | Eliminate all non-generating nonterminals of the grammar.
-eliminateNonGeneratingNonterminals :: (Ord t, Ord n) => Grammar t n -> Grammar t n
-eliminateNonGeneratingNonterminals g = g { nonterminals = gns, productions = gps } where
-  gps = Set.filter (\p -> Set.member (lhs p) gns && all (`Set.member` gns) (rhsNonterminals p)) $ productions g
-  gns = generatingNonterminals g
+-- | A set of all non-generating grammar nonterminals.
+nonGeneratingNonterminals :: (Ord t, Ord n) => Grammar t n -> Set n
+nonGeneratingNonterminals g = Set.difference (nonterminals g) $ generatingNonterminals g
+
+-- | Eliminate all useless nonterminals from the grammar.
+eliminateUselessNonterminals :: (Ord t, Ord n) => Grammar t n -> Grammar t n
+eliminateUselessNonterminals g = eliminateNonterminals (nonGeneratingNonterminals h) h where
+  h = eliminateNonterminals (unreachableNonterminals g) g
