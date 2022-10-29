@@ -44,8 +44,8 @@ eliminateNonterminals ns g = g { nonterminals = Set.difference (nonterminals g) 
 
 {- | A set of all generating grammar nonterminals.
 
-A nonterminal \( A \) is generating in a grammar
-\( \Gamma = (\Sigma, N, P, S) \) if
+A nonterminal \( A \) is generating
+in a grammar \( \Gamma = (\Sigma, N, P, S) \) if
 
 \[
 \exists w \in \Sigma^*:
@@ -64,8 +64,8 @@ nonGeneratingNonterminals g = Set.difference (nonterminals g) $ generatingNonter
 
 {- | A set of all reachable grammar nonterminals.
 
-A nonterminal \( A \) is reachable in a grammar
-\( \Gamma = (\Sigma, N, P, S) \) if
+A nonterminal \( A \) is reachable
+in a grammar \( \Gamma = (\Sigma, N, P, S) \) if
 
 \[
 \exists \alpha, \beta \in (\Sigma \cup N)^*:
@@ -84,8 +84,8 @@ unreachableNonterminals g = Set.difference (nonterminals g) $ reachableNontermin
 
 {- | A set of all useful grammar nonterminals.
 
-A nonterminal \( A \) is useful in a grammar
-\( \Gamma = (\Sigma, N, P, S) \) if
+A nonterminal \( A \) is useful
+in a grammar \( \Gamma = (\Sigma, N, P, S) \) if
 
 \[
 \exists \alpha, \beta \in (\Sigma \cup N)^*, w \in \Sigma^*:
@@ -105,7 +105,15 @@ eliminateUselessNonterminals :: (Ord t, Ord n) => Grammar t n -> Grammar t n
 eliminateUselessNonterminals g = eliminateNonterminals (nonGeneratingNonterminals h) h where
   h = eliminateNonterminals (unreachableNonterminals g) g
 
--- | A set of all long grammar productions.
+{- | A set of all long grammar productions.
+
+A production \( A \rightarrow \alpha \) is long if
+
+\[
+| \alpha | \geq 2.
+\]
+-}
+
 longProductions :: Grammar t n -> Set (Production t n)
 longProductions = Set.filter ((> 2) . length . rhs) . productions
 
