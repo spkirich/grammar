@@ -3,13 +3,14 @@
 module Grammar.Normalization
   ( -- * Useless nonterminals
 
-    eliminateNonterminals
+    generatingNonterminals
+  , nonGeneratingNonterminals
 
-  ,   reachableNonterminals
+  , reachableNonterminals
   , unreachableNonterminals
 
-  ,    generatingNonterminals
-  , nonGeneratingNonterminals
+  , usefulNonterminals
+  , uselessNonterminals
 
   , eliminateUselessNonterminals
 
@@ -37,12 +38,41 @@ import qualified Data.Set as Set
 
 import Grammar.Definition
 
--- | Eliminate a given set of the grammar nonterminals.
 eliminateNonterminals :: (Ord t, Ord n) => Set n -> Grammar t n -> Grammar t n
 eliminateNonterminals ns g = g { nonterminals = Set.difference (nonterminals g) ns, productions = ps } where
-  ps = Set.filter (\p -> not $ Set.member (lhs p) ns && all (`Set.member` ns) (rhsNonterminals p)) $ productions g
+  ps = Set.filter (\p -> not $ Set.member (lhs p) ns || any (`Set.member` ns) (rhsNonterminals p)) $ productions g
 
--- | A set of all reachable grammar nonterminals.
+{- | A set of all generating grammar nonterminals.
+
+A nonterminal \( A \) is generating in a grammar
+\( \Gamma = (\Sigma, N, P, S) \) if
+
+\[
+\exists w \in \Sigma^*:
+A \Rightarrow^* w.
+\]
+-}
+
+generatingNonterminals :: (Ord t, Ord n) => Grammar t n -> Set n
+generatingNonterminals g = fst $ until (uncurry (==)) (\(_, ns) -> (ns, step ns)) (Set.empty, basis) where
+  step ns = Set.union ns . Set.map lhs . Set.filter (all (`Set.member` ns) . rhsNonterminals) $ productions g
+  basis = Set.map lhs . Set.filter (null . rhsNonterminals) $ productions g
+
+-- | A set of all non-generating grammar nonterminals.
+nonGeneratingNonterminals :: (Ord t, Ord n) => Grammar t n -> Set n
+nonGeneratingNonterminals g = Set.difference (nonterminals g) $ generatingNonterminals g
+
+{- | A set of all reachable grammar nonterminals.
+
+A nonterminal \( A \) is reachable in a grammar
+\( \Gamma = (\Sigma, N, P, S) \) if
+
+\[
+\exists \alpha, \beta \in (\Sigma \cup N)^*:
+S \Rightarrow^* \alpha A \beta.
+\]
+-}
+
 reachableNonterminals :: (Ord t, Ord n) => Grammar t n -> Set n
 reachableNonterminals g = fst $ until (uncurry (==)) (\(_, ns) -> (ns, step ns)) (Set.empty, basis) where
   step ns = Set.union ns . Set.unions . Set.map rhsNonterminals . Set.filter ((`Set.member` ns) . lhs) $ productions g
@@ -52,15 +82,23 @@ reachableNonterminals g = fst $ until (uncurry (==)) (\(_, ns) -> (ns, step ns))
 unreachableNonterminals :: (Ord t, Ord n) => Grammar t n -> Set n
 unreachableNonterminals g = Set.difference (nonterminals g) $ reachableNonterminals g
 
--- | A set of all generating grammar nonterminals.
-generatingNonterminals :: (Ord t, Ord n) => Grammar t n -> Set n
-generatingNonterminals g = fst $ until (uncurry (==)) (\(_, ns) -> (ns, step ns)) (Set.empty, basis) where
-  step ns = Set.union ns . Set.map lhs . Set.filter (all (`Set.member` ns) . rhsNonterminals) $ productions g
-  basis = Set.map lhs . Set.filter (null . rhsNonterminals) $ productions g
+{- | A set of all useful grammar nonterminals.
 
--- | A set of all non-generating grammar nonterminals.
-nonGeneratingNonterminals :: (Ord t, Ord n) => Grammar t n -> Set n
-nonGeneratingNonterminals g = Set.difference (nonterminals g) $ generatingNonterminals g
+A nonterminal \( A \) is useful in a grammar
+\( \Gamma = (\Sigma, N, P, S) \) if
+
+\[
+\exists \alpha, \beta \in (\Sigma \cup N)^*, w \in \Sigma^*:
+S \Rightarrow^* \alpha A \beta \Rightarrow^* w.
+\]
+-}
+
+usefulNonterminals :: (Ord t, Ord n) => Grammar t n -> Set n
+usefulNonterminals g = Set.difference (nonterminals g) $ uselessNonterminals g
+
+-- | A set of all useless grammar nonterminals.
+uselessNonterminals :: (Ord t, Ord n) => Grammar t n -> Set n
+uselessNonterminals g = Set.union (unreachableNonterminals g) $ nonGeneratingNonterminals g
 
 -- | Eliminate all useless nonterminals from the grammar.
 eliminateUselessNonterminals :: (Ord t, Ord n) => Grammar t n -> Grammar t n

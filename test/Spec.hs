@@ -73,16 +73,6 @@ spec = do
         p = Production 0 [Left a, Right s, Left b, Right t, Left c] :: Production Int Int
       in rhsNonterminals p == Set.fromList [s, t]
 
-  describe "eliminateNonterminals" $ do
-
-    prop "handles an empty set of nonterminals" $ \g -> let
-        h = eliminateNonterminals Set.empty g :: Grammar Int Int
-      in nonterminals h == nonterminals g && productions h == productions g
-
-    prop "handles the entire set of the grammar nonterminals" $ \g -> let
-        h = eliminateNonterminals (nonterminals g) g :: Grammar Int Int
-      in null (nonterminals h) && null (productions h)
-
   describe "reachableNonterminals" $ do
 
     prop "includes the start nonterminal" $ \g ->
@@ -98,6 +88,22 @@ spec = do
         g = Grammar Set.empty (Set.fromList [s, n])
           Set.empty s :: Grammar Int Int
       in reachableNonterminals g == Set.singleton s
+
+    prop "includes the right nonterminals" $ \a b s u v -> let
+        g = Grammar
+          { terminals    = Set.fromList [a, b]
+          , nonterminals = Set.fromList [s, u, v]
+          , productions  = Set.fromList
+            [ Production s
+              [ Right u
+              , Right v
+              ]
+            , Production s [Left a]
+            , Production u [Left b]
+            ]
+          , startNonterminal = s
+          } :: Grammar Int Int
+      in reachableNonterminals g == Set.fromList [s, u, v]
 
   describe "unreachableNonterminals" $ do
 
@@ -119,6 +125,22 @@ spec = do
           Set.empty s :: Grammar Int Int
       in null $ generatingNonterminals g
 
+    prop "includes the right nonterminals" $ \a b s u v -> let
+        g = Grammar
+          { terminals    = Set.fromList [a, b]
+          , nonterminals = Set.fromList [s, u, v]
+          , productions  = Set.fromList
+            [ Production s
+              [ Right u
+              , Right v
+              ]
+            , Production s [Left a]
+            , Production u [Left b]
+            ]
+          , startNonterminal = s
+          } :: Grammar Int Int
+      in generatingNonterminals g == Set.fromList [s, u]
+
   describe "nonGeneratingNonterminals" $ do
 
     prop "complements generatingNonterminals" $ \g -> let
@@ -126,6 +148,25 @@ spec = do
         gns =    generatingNonterminals g
       in Set.union gns nns == nonterminals
         (g :: Grammar Int Int)
+
+  describe "eliminateUselessNonterminals" $ do
+
+    prop "eliminates the right nonterminals" $ \a b s u v -> let
+        g = Grammar
+          { terminals    = Set.fromList [a, b]
+          , nonterminals = Set.fromList [s, u, v]
+          , productions  = Set.fromList
+            [ Production s
+              [ Right u
+              , Right v
+              ]
+            , Production s [Left a]
+            , Production u [Left b]
+            ]
+          , startNonterminal = s
+          } :: Grammar Int Int
+        h = eliminateUselessNonterminals g
+      in nonterminals h == Set.fromList [s, u]
 
   describe "longProductions" $ do
 
