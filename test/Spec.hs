@@ -80,13 +80,22 @@ spec = do
         (g :: Grammar Int Int)
 
     prop "includes trivially reachable nonterminals" $ \s n -> let
-        g = Grammar Set.empty (Set.fromList [s, n])
-          (Set.singleton (Production s [Right n])) s :: Grammar Int Int
+        g = Grammar
+          { terminals    = Set.empty
+          , nonterminals = Set.fromList [s, n]
+          , productions  = Set.singleton
+            $ Production s [Right n]
+          , startNonterminal = s
+          } :: Grammar Int Int
       in reachableNonterminals g == Set.fromList [s, n]
 
     prop "does not include unreachable nonterminals" $ \s n -> let
-        g = Grammar Set.empty (Set.fromList [s, n])
-          Set.empty s :: Grammar Int Int
+        g = Grammar
+          { terminals    = Set.empty
+          , nonterminals = Set.fromList [s, n]
+          , productions  = Set.empty
+          , startNonterminal = s
+          } :: Grammar Int Int
       in reachableNonterminals g == Set.singleton s
 
     prop "includes the right nonterminals" $ \a b s u v -> let
@@ -116,13 +125,22 @@ spec = do
   describe "generatingNonterminals" $ do
 
     prop "includes trivially generating nonterminals" $ \t s -> let
-        g = Grammar (Set.singleton t) (Set.singleton s)
-          (Set.fromList [Production s [Left t]]) s :: Grammar Int Int
+        g = Grammar
+          { terminals    = Set.singleton t
+          , nonterminals = Set.singleton s
+          , productions  = Set.singleton
+            $ Production s [Left t]
+          , startNonterminal = s
+          } :: Grammar Int Int
       in generatingNonterminals g == Set.singleton s
 
     prop "does not include non-generating nonterminals" $ \s -> let
-        g = Grammar Set.empty (Set.singleton s)
-          Set.empty s :: Grammar Int Int
+        g = Grammar
+          { terminals    = Set.empty
+          , nonterminals = Set.singleton s
+          , productions  = Set.empty
+          , startNonterminal = s
+          } :: Grammar Int Int
       in null $ generatingNonterminals g
 
     prop "includes the right nonterminals" $ \a b s u v -> let
