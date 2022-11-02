@@ -27,4 +27,4 @@ based upon an amazing
 [work](https://github.com/StarikTenger/RegularLanguageProblem) by
 [Andrei Ilin](https://github.com/StarikTenger),
 [Edgar Makarov](https://github.com/Robby-the-paladin) and
-[Sofia Belyakova](https://github.com/SoFa325).
+[Sofya Belyakova](https://github.com/SoFa325).
